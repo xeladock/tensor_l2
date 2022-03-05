@@ -1,0 +1,23 @@
+---
+- name: create users
+  hosts: local
+  become: true
+  vars_files:
+    - vars/users.yml    
+  tasks:
+   - name: Create group for users, which gonna be generated via ansible
+     shell: groupadd -f ans_users
+
+   - name: create 5 users via loop and pause's 5 sec through
+     no_log: true
+     user:
+       name: "{{ item.name }}"
+       uid: "{{ item.uid }}"
+       groups: "{{ item.groups }}"
+       append: true
+       password: "{{ item.password | password_hash('sha512') }}"
+       comment: Ansible-generated users
+       state: present
+     loop: "{{ users }}"
+     loop_control:
+       pause: 5
